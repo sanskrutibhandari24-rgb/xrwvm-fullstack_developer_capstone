@@ -1,0 +1,36 @@
+name: Django CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f server/requirements.txt ]; then
+            pip install -r server/requirements.txt
+          else
+            echo "requirements.txt not found; checking project files"
+            find server -maxdepth 2 -type f
+          fi
+
+      - name: Check Python files
+        run: |
+          python -m compileall -q server
+          echo "Python compilation completed successfully"
